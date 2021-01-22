@@ -1,0 +1,1617 @@
+{
+  "paragraphs": [
+    {
+      "text": "import sys.process._\nimport java.net.URL\nimport java.io.File\nimport java.io.File\nimport java.nio.file.{Files, StandardCopyOption}\nimport java.net.HttpURLConnection \nimport org.apache.spark.sql.functions._\n\nimport org.apache.spark.input.PortableDataStream\nimport java.util.zip.ZipInputStream\nimport java.io.BufferedReader\nimport java.io.InputStreamReader\nimport org.apache.spark.SparkConf\nimport org.apache.spark.input.PortableDataStream\nimport org.apache.spark.sql.functions.{col, substring}\nimport org.apache.spark.sql.{DataFrame, SparkSession}\nimport org.apache.spark.sql.SQLContext\nimport org.apache.spark.sql.functions.lit\nimport org.apache.spark.sql.types._",
+      "user": "anonymous",
+      "dateUpdated": "2021-01-18 18:24:17.475",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "import sys.process._\nimport java.net.URL\nimport java.io.File\nimport java.nio.file.{Files, StandardCopyOption}\nimport java.net.HttpURLConnection\nimport org.apache.spark.sql.functions._\nimport org.apache.spark.input.PortableDataStream\nimport java.util.zip.ZipInputStream\nimport java.io.BufferedReader\nimport java.io.InputStreamReader\nimport org.apache.spark.SparkConf\nimport org.apache.spark.input.PortableDataStream\nimport org.apache.spark.sql.functions.{col, substring}\nimport org.apache.spark.sql.{DataFrame, SparkSession}\nimport org.apache.spark.sql.SQLContext\nimport org.apache.spark.sql.functions.lit\nimport org.apache.spark.sql.types._\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1610870078584_505556301",
+      "id": "paragraph_1610870078584_505556301",
+      "dateCreated": "2021-01-17 08:54:38.585",
+      "dateStarted": "2021-01-18 16:30:09.248",
+      "dateFinished": "2021-01-18 16:30:24.699",
+      "status": "FINISHED"
+    },
+    {
+      "text": "// Emplacement des fichiers .parquet\nval GKG_path \u003d \"/home/neo/Documents/Telecom Paris/INF721 - BDD non relationnelles/Projet/DF_new/df_gkg_\"\nval mentions_path \u003d \"/home/neo/Documents/Telecom Paris/INF721 - BDD non relationnelles/Projet/DF_new/df_mentions_\"\nval events_path \u003d \"/home/neo/Documents/Telecom Paris/INF721 - BDD non relationnelles/Projet/DF_new/df_events_\"",
+      "user": "anonymous",
+      "dateUpdated": "2021-01-18 16:30:33.549",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "\u001b[1m\u001b[34mGKG_path\u001b[0m: \u001b[1m\u001b[32mString\u001b[0m \u003d /home/neo/Documents/Telecom Paris/INF721 - BDD non relationnelles/Projet/DF_new/df_gkg_\n\u001b[1m\u001b[34mmentions_path\u001b[0m: \u001b[1m\u001b[32mString\u001b[0m \u003d /home/neo/Documents/Telecom Paris/INF721 - BDD non relationnelles/Projet/DF_new/df_mentions_\n\u001b[1m\u001b[34mevents_path\u001b[0m: \u001b[1m\u001b[32mString\u001b[0m \u003d /home/neo/Documents/Telecom Paris/INF721 - BDD non relationnelles/Projet/DF_new/df_events_\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1610870178943_119398459",
+      "id": "paragraph_1610870178943_119398459",
+      "dateCreated": "2021-01-17 08:56:18.944",
+      "dateStarted": "2021-01-18 16:30:33.557",
+      "dateFinished": "2021-01-18 16:30:33.829",
+      "status": "FINISHED"
+    },
+    {
+      "text": "// On commence avec les fichiers GKG car ils contiennent les premières informations filtrées, ie. le V2Themes CORONAVIRUS\n\n// On initiliase avec le mois de janvier\nvar gkgDF \u003d spark.read.parquet(GKG_path + \"202001\")\n    .select(\n        col(\"value\").getItem(0).as(\"gkgrecordid\"),\n        col(\"value\").getItem(3).as(\"sourcecommonname\"),\n        col(\"value\").getItem(4).as(\"documentidentifier\"),\n        col(\"value\").getItem(8).as(\"v2themes\"),\n        col(\"value\").getItem(10).as(\"v2locations\"),\n        col(\"value\").getItem(12).as(\"v2persons\"),\n        col(\"value\").getItem(15).as(\"v2tone\")\n    )\nprintln(\"Nombre de lignes : \" + gkgDF.count())\n\nvar temp_gkgDF \u003d spark.read.parquet(GKG_path + \"translation_202001\")\n        .select(\n            col(\"value\").getItem(0).as(\"gkgrecordid\"),\n            col(\"value\").getItem(3).as(\"sourcecommonname\"),\n            col(\"value\").getItem(4).as(\"documentidentifier\"),\n            col(\"value\").getItem(8).as(\"v2themes\"),\n            col(\"value\").getItem(10).as(\"v2locations\"),\n            col(\"value\").getItem(12).as(\"v2persons\"),\n            col(\"value\").getItem(15).as(\"v2tone\")\n        )\n    //println(temp_gkgDF.count())\n    \ngkgDF \u003d gkgDF.union(temp_gkgDF)\nprintln(\"Nombre de lignes : \" + gkgDF.count())\n\n// On continue avec les autres mois\nval moisList \u003d List(\"02\",\"03\",\"04\",\"05\",\"06\",\"07\",\"08\",\"09\",\"10\",\"11\",\"12\");\n\nfor( mois \u003c- moisList) {\n    temp_gkgDF \u003d spark.read.parquet(GKG_path + \"2020\" + mois)\n        .select(\n            col(\"value\").getItem(0).as(\"gkgrecordid\"),\n            col(\"value\").getItem(3).as(\"sourcecommonname\"),\n            col(\"value\").getItem(4).as(\"documentidentifier\"),\n            col(\"value\").getItem(8).as(\"v2themes\"),\n            col(\"value\").getItem(10).as(\"v2locations\"),\n            col(\"value\").getItem(12).as(\"v2persons\"),\n            col(\"value\").getItem(15).as(\"v2tone\")\n            )\n    //println(temp_gkgDF.count())\n    \n    gkgDF \u003d gkgDF.union(temp_gkgDF)\n    println(\"Nombre de lignes GKG (\" + mois + \") : \" + gkgDF.count())\n    \n    temp_gkgDF \u003d spark.read.parquet(GKG_path + \"translation_2020\" + mois)\n        .select(\n            col(\"value\").getItem(0).as(\"gkgrecordid\"),\n            col(\"value\").getItem(3).as(\"sourcecommonname\"),\n            col(\"value\").getItem(4).as(\"documentidentifier\"),\n            col(\"value\").getItem(8).as(\"v2themes\"),\n            col(\"value\").getItem(10).as(\"v2locations\"),\n            col(\"value\").getItem(12).as(\"v2persons\"),\n            col(\"value\").getItem(15).as(\"v2tone\")\n            )\n    //println(temp_gkgDF.count())\n    \n    gkgDF \u003d gkgDF.union(temp_gkgDF)\n    println(\"Nombre de lignes GKG translation (\" + mois + \") : \" + gkgDF.count())\n}\nval totalgkgDF \u003d gkgDF\n// On peut écrire le fichier en .parquet\n//totalgkgDF.write.parquet(\"/tmp/DF/df_gkg_total_2020\")\n",
+      "user": "anonymous",
+      "dateUpdated": "2021-01-18 16:49:15.067",
+      "progress": 96,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "Nombre de lignes : 129005\nNombre de lignes : 268199\nNombre de lignes GKG (02) : 670147\nNombre de lignes GKG translation (02) : 1073850\nNombre de lignes GKG (03) : 3242678\nNombre de lignes GKG translation (03) : 4538992\nNombre de lignes GKG (04) : 6741124\nNombre de lignes GKG translation (04) : 8017385\nNombre de lignes GKG (05) : 9586593\nNombre de lignes GKG translation (05) : 10481935\nNombre de lignes GKG (06) : 11566094\nNombre de lignes GKG translation (06) : 12200908\nNombre de lignes GKG (07) : 13266017\nNombre de lignes GKG translation (07) : 13830085\nNombre de lignes GKG (08) : 14686721\nNombre de lignes GKG translation (08) : 15140264\nNombre de lignes GKG (09) : 15865509\nNombre de lignes GKG translation (09) : 16250883\nNombre de lignes GKG (10) : 16756150\nNombre de lignes GKG translation (10) : 17033275\nNombre de lignes GKG (11) : 17474242\nNombre de lignes GKG translation (11) : 17709397\nNombre de lignes GKG (12) : 18414254\nNombre de lignes GKG translation (12) : 18794070\n\u001b[1m\u001b[34mgkgDF\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.sql.DataFrame\u001b[0m \u003d [gkgrecordid: string, sourcecommonname: string ... 5 more fields]\n\u001b[1m\u001b[34mtemp_gkgDF\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.sql.DataFrame\u001b[0m \u003d [gkgrecordid: string, sourcecommonname: string ... 5 more fields]\ngkgDF: org.apache.spark.sql.DataFrame \u003d [gkgrecordid: string, sourcecommonname: string ... 5 more fields]\n\u001b[1m\u001b[34mmoisList\u001b[0m: \u001b[1m\u001b[32mList[String]\u001b[0m \u003d List(02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12)\n\u001b[1m\u001b[34mtotalgkgDF\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.sql.DataFrame\u001b[0m \u003d [gkgrecordid: string, sourcecommonname: string ... 5 more fields]\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d2"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d3"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d4"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d5"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d6"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d7"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d8"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d9"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d10"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d11"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d12"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d13"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d14"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d15"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d16"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d17"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d18"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d19"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d20"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d21"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d22"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d23"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d24"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d25"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d26"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d27"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d28"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d29"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d30"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d31"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d32"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d33"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d34"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d35"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d36"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d37"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d38"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d39"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d40"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d41"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d42"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d43"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d44"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d45"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d46"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d47"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d48"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d49"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1610870176412_2115207629",
+      "id": "paragraph_1610870176412_2115207629",
+      "dateCreated": "2021-01-17 08:56:16.412",
+      "dateStarted": "2021-01-18 16:49:15.075",
+      "dateFinished": "2021-01-18 16:50:05.637",
+      "status": "FINISHED"
+    },
+    {
+      "text": "totalgkgDF.write.parquet(\"/home/neo/Documents/Telecom Paris/INF721 - BDD non relationnelles/Projet/DF_new/df_gkg_total_2020\")",
+      "user": "anonymous",
+      "dateUpdated": "2021-01-18 16:51:05.128",
+      "progress": 100,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": []
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d50"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1610985028775_968548418",
+      "id": "paragraph_1610985028775_968548418",
+      "dateCreated": "2021-01-18 16:50:28.775",
+      "dateStarted": "2021-01-18 16:51:05.134",
+      "dateFinished": "2021-01-18 17:04:33.688",
+      "status": "FINISHED"
+    },
+    {
+      "text": "// Filtrer par rapport à la table GKG\n\nval expectedNumItems \u003d 20000000 // Peut être rajouter un 0 ?\nval fpp \u003d 0.03\n\nval bfGKG \u003d totalgkgDF.stat.bloomFilter(col(\"documentidentifier\"), expectedNumItems, fpp)\n\n//val broadcast_bfGKG \u003d spark.sparkContext.broadcast(bfGKG)\n\n//val filteredtotalmentionsDF \u003d totalmentionsDF.filter(broadcast_bfGKG.value.mightContain(col(\"mentionidentifier\")))\n\n//val totalmentionsgkgDF \u003d totalmentionsDF.join(totalgkgDF, col(\"mentionidentifier\") \u003d\u003d\u003d totalgkgDF(\"documentidentifier\"),\"inner\")",
+      "user": "anonymous",
+      "dateUpdated": "2021-01-18 17:12:57.295",
+      "progress": 99,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "\u001b[1m\u001b[34mexpectedNumItems\u001b[0m: \u001b[1m\u001b[32mInt\u001b[0m \u003d 20000000\n\u001b[1m\u001b[34mfpp\u001b[0m: \u001b[1m\u001b[32mDouble\u001b[0m \u003d 0.03\n\u001b[1m\u001b[34mbfGKG\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.util.sketch.BloomFilter\u001b[0m \u003d org.apache.spark.util.sketch.BloomFilterImpl@f85acf27\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d51"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1610880359519_694404677",
+      "id": "paragraph_1610880359519_694404677",
+      "dateCreated": "2021-01-17 11:45:59.519",
+      "dateStarted": "2021-01-18 17:12:57.303",
+      "dateFinished": "2021-01-18 17:26:46.791",
+      "status": "FINISHED"
+    },
+    {
+      "text": "\n// On contine avec les fichiers mentions qui sont liés aux fichiers GKG par la colonne mentionidentifier\n// qui correspond à GKG.documentidentifier\n\n// On initiliase avec la version ENG qui contient toute l\u0027année\nvar mentionsDF \u003d spark.read.parquet(mentions_path + \"2020\")\n    .select(\n        col(\"value\").getItem(0).cast(LongType).as(\"globaleventid\"),\n        col(\"value\").getItem(5).as(\"mentionidentifier\"),\n        col(\"value\").getItem(14).as(\"mentionDoctranslationinfo\"),\n        lit(\"eng\").as(\"language\")// mettre eng pour la table mentions\n    )\n    .filter(x \u003d\u003e bfGKG.mightContain(x(1)))\n    //.join(totalgkgDF, col(\"mentionidentifier\") \u003d\u003d\u003d totalgkgDF(\"documentidentifier\"),\"inner\")\n    //.filter(col(\"mentionidentifier\") \u003d\u003d\u003d totalgkgDF.select(col(\"documentidentifier\")))\n    //.show(false)\n    //.count()\nprintln(\"Nombre de lignes mentions (2020) : \" + mentionsDF.count())\n\nval moisList \u003d List(\"01\",\"02\",\"03\",\"04\",\"05\",\"06\",\"07\",\"08\",\"09\",\"10\",\"11\",\"12\");\nfor( mois \u003c- moisList) {\n    var mentionsTranslationDF \u003d spark.read.parquet(mentions_path + \"translations_2020\" + mois)\n        .select(\n            col(\"value\").getItem(0).cast(LongType).as(\"globaleventid\"),\n            col(\"value\").getItem(5).as(\"mentionidentifier\"),\n            col(\"value\").getItem(14).as(\"mentionDoctranslationinfo\"),\n            //regexp_extract(col(\"value\").getItem(14), \"(?\u003c\u003d:)(.*?)(?\u003d;)\", 1).as(\"language\"),\n            substring(col(\"value\").getItem(14),7,3).as(\"language\")\n            )\n            .filter(x \u003d\u003e bfGKG.mightContain(x(1)))\n            //.join(totalgkgDF, col(\"mentionidentifier\") \u003d\u003d\u003d totalgkgDF(\"documentidentifier\"),\"inner\")\n            //.show()\n    mentionsDF \u003d mentionsDF.union(mentionsTranslationDF)\n    println(\"Nombre de lignes mentions translation (\" + mois + \") : \" + mentionsDF.count())\n}\n\n\n\nval totalmentionsDF \u003d mentionsDF\ntotalmentionsDF.write.parquet(\"/home/neo/Documents/Telecom Paris/INF721 - BDD non relationnelles/Projet/DF_new/df_mentions_total_2020_new\")\n",
+      "user": "anonymous",
+      "dateUpdated": "2021-01-18 18:19:47.668",
+      "progress": 100,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "ERROR",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "Nombre de lignes mentions (2020) : 48103389\nNombre de lignes mentions translation (01) : 48359120\nNombre de lignes mentions translation (02) : 48813704\nNombre de lignes mentions translation (03) : 50131895\nNombre de lignes mentions translation (04) : 51366894\nNombre de lignes mentions translation (05) : 52297338\nNombre de lignes mentions translation (06) : 52994251\nNombre de lignes mentions translation (07) : 53614692\nNombre de lignes mentions translation (08) : 54122122\nNombre de lignes mentions translation (09) : 54556794\nNombre de lignes mentions translation (10) : 54860196\nNombre de lignes mentions translation (11) : 55120204\nNombre de lignes mentions translation (12) : 55595836\norg.apache.spark.sql.AnalysisException: path file:/home/neo/Documents/Telecom Paris/INF721 - BDD non relationnelles/Projet/DF_new/df_mentions_total_2020 already exists.;\n  at org.apache.spark.sql.execution.datasources.InsertIntoHadoopFsRelationCommand.run(InsertIntoHadoopFsRelationCommand.scala:121)\n  at org.apache.spark.sql.execution.command.DataWritingCommandExec.sideEffectResult$lzycompute(commands.scala:108)\n  at org.apache.spark.sql.execution.command.DataWritingCommandExec.sideEffectResult(commands.scala:106)\n  at org.apache.spark.sql.execution.command.DataWritingCommandExec.doExecute(commands.scala:131)\n  at org.apache.spark.sql.execution.SparkPlan.$anonfun$execute$1(SparkPlan.scala:175)\n  at org.apache.spark.sql.execution.SparkPlan.$anonfun$executeQuery$1(SparkPlan.scala:213)\n  at org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:151)\n  at org.apache.spark.sql.execution.SparkPlan.executeQuery(SparkPlan.scala:210)\n  at org.apache.spark.sql.execution.SparkPlan.execute(SparkPlan.scala:171)\n  at org.apache.spark.sql.execution.QueryExecution.toRdd$lzycompute(QueryExecution.scala:122)\n  at org.apache.spark.sql.execution.QueryExecution.toRdd(QueryExecution.scala:121)\n  at org.apache.spark.sql.DataFrameWriter.$anonfun$runCommand$1(DataFrameWriter.scala:963)\n  at org.apache.spark.sql.execution.SQLExecution$.$anonfun$withNewExecutionId$5(SQLExecution.scala:100)\n  at org.apache.spark.sql.execution.SQLExecution$.withSQLConfPropagated(SQLExecution.scala:160)\n  at org.apache.spark.sql.execution.SQLExecution$.$anonfun$withNewExecutionId$1(SQLExecution.scala:87)\n  at org.apache.spark.sql.SparkSession.withActive(SparkSession.scala:764)\n  at org.apache.spark.sql.execution.SQLExecution$.withNewExecutionId(SQLExecution.scala:64)\n  at org.apache.spark.sql.DataFrameWriter.runCommand(DataFrameWriter.scala:963)\n  at org.apache.spark.sql.DataFrameWriter.saveToV1Source(DataFrameWriter.scala:415)\n  at org.apache.spark.sql.DataFrameWriter.save(DataFrameWriter.scala:399)\n  at org.apache.spark.sql.DataFrameWriter.save(DataFrameWriter.scala:288)\n  at org.apache.spark.sql.DataFrameWriter.parquet(DataFrameWriter.scala:848)\n  ... 51 elided\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d52"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d53"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d54"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d55"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d56"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d57"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d58"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d59"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d60"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d61"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d62"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d63"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d64"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d65"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d66"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d67"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d68"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d69"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d70"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d71"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d72"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d73"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d74"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d75"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d76"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d77"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1610870105498_777454457",
+      "id": "paragraph_1610870105498_777454457",
+      "dateCreated": "2021-01-17 08:55:05.498",
+      "dateStarted": "2021-01-18 17:41:24.832",
+      "dateFinished": "2021-01-18 18:19:14.290",
+      "status": "ERROR"
+    },
+    {
+      "text": "totalmentionsDF.write.parquet(\"/home/neo/Documents/Telecom Paris/INF721 - BDD non relationnelles/Projet/DF_new/df_mentions_total_2020_new\")",
+      "user": "anonymous",
+      "dateUpdated": "2021-01-18 18:19:50.895",
+      "progress": 93,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": []
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d78"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1610990387784_1408236157",
+      "id": "paragraph_1610990387784_1408236157",
+      "dateCreated": "2021-01-18 18:19:47.792",
+      "dateStarted": "2021-01-18 18:19:50.918",
+      "dateFinished": "2021-01-18 18:20:16.553",
+      "status": "FINISHED"
+    },
+    {
+      "text": "totalmentionsDF.count()",
+      "user": "anonymous",
+      "dateUpdated": "2021-01-18 18:21:24.285",
+      "progress": 99,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "\u001b[1m\u001b[34mres5\u001b[0m: \u001b[1m\u001b[32mLong\u001b[0m \u003d 50975938\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d79"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1610959811209_613250696",
+      "id": "paragraph_1610959811209_613250696",
+      "dateCreated": "2021-01-18 09:50:11.209",
+      "dateStarted": "2021-01-18 18:21:24.307",
+      "dateFinished": "2021-01-18 18:21:24.815",
+      "status": "FINISHED"
+    },
+    {
+      "text": "totalmentionsDF.take(1//)",
+      "user": "anonymous",
+      "dateUpdated": "2021-01-18 18:24:00.219",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "\u001b[1m\u001b[34mres6\u001b[0m: \u001b[1m\u001b[32mArray[org.apache.spark.sql.Row]\u001b[0m \u003d Array([841438066,http://diario1.com/mundo/estudiantes-de-bachillerato-vuelven-a-las-aulas-en-china/,srclc:spa,spa])\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d80"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1610990619468_483453145",
+      "id": "paragraph_1610990619468_483453145",
+      "dateCreated": "2021-01-18 18:23:39.470",
+      "dateStarted": "2021-01-18 18:23:47.757",
+      "dateFinished": "2021-01-18 18:23:48.472",
+      "status": "FINISHED"
+    },
+    {
+      "text": "val filteredtotalmentionsDF \u003d totalmentionsDF.filter(x \u003d\u003e bfGKG.mightContain(x(1))) // Essayer le mightContainString ",
+      "user": "anonymous",
+      "dateUpdated": "2021-01-17 23:27:59.401",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "\u001b[1m\u001b[34mfilteredtotalmentionsDF\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.sql.Dataset[org.apache.spark.sql.Row]\u001b[0m \u003d [globaleventid: bigint, mentionidentifier: string ... 2 more fields]\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1610921941819_1734359663",
+      "id": "paragraph_1610921941819_1734359663",
+      "dateCreated": "2021-01-17 23:19:01.819",
+      "dateStarted": "2021-01-17 23:21:07.578",
+      "dateFinished": "2021-01-17 23:21:07.815",
+      "status": "FINISHED"
+    },
+    {
+      "text": "filteredtotalmentionsDF.count()",
+      "user": "anonymous",
+      "dateUpdated": "2021-01-17 23:21:21.209",
+      "progress": 99,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "\u001b[1m\u001b[34mres37\u001b[0m: \u001b[1m\u001b[32mLong\u001b[0m \u003d 50975938\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d110"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1610922078047_1559703478",
+      "id": "paragraph_1610922078047_1559703478",
+      "dateCreated": "2021-01-17 23:21:18.048",
+      "dateStarted": "2021-01-17 23:21:21.214",
+      "dateFinished": "2021-01-17 23:25:14.260",
+      "status": "FINISHED"
+    },
+    {
+      "text": "filteredtotalmentionsDF.take(1)",
+      "user": "anonymous",
+      "dateUpdated": "2021-01-17 23:26:44.840",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "\u001b[1m\u001b[34mres38\u001b[0m: \u001b[1m\u001b[32mArray[org.apache.spark.sql.Row]\u001b[0m \u003d Array([897548824,https://www.voiceofalexandria.com/news/national_business_news/eu-chief-warns-uk-must-compromise-to-get-brexit-trade/article_2730c54a-83da-5a61-872d-136ad15430cc.html,null,eng])\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d111"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1610920779674_822376448",
+      "id": "paragraph_1610920779674_822376448",
+      "dateCreated": "2021-01-17 22:59:39.675",
+      "dateStarted": "2021-01-17 23:26:44.847",
+      "dateFinished": "2021-01-17 23:26:45.678",
+      "status": "FINISHED"
+    },
+    {
+      "text": "val totalmentionsDF \u003d spark.read.parquet(\"/home/neo/Documents/Telecom Paris/INF721 - BDD non relationnelles/Projet/DF_new/df_mentions_total_2020\")",
+      "user": "anonymous",
+      "dateUpdated": "2021-01-18 16:32:04.119",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "\u001b[1m\u001b[34mtotalmentionsDF\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.sql.DataFrame\u001b[0m \u003d [globaleventid: bigint, mentionidentifier: string ... 2 more fields]\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d0"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1610983885169_1509147004",
+      "id": "paragraph_1610983885169_1509147004",
+      "dateCreated": "2021-01-18 16:31:25.169",
+      "dateStarted": "2021-01-18 16:32:04.123",
+      "dateFinished": "2021-01-18 16:32:08.596",
+      "status": "FINISHED"
+    },
+    {
+      "text": "totalmentionsDF.count()",
+      "user": "anonymous",
+      "dateUpdated": "2021-01-18 16:32:22.853",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "\u001b[1m\u001b[34mres1\u001b[0m: \u001b[1m\u001b[32mLong\u001b[0m \u003d 50975938\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d1"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1610983935543_398122993",
+      "id": "paragraph_1610983935543_398122993",
+      "dateCreated": "2021-01-18 16:32:15.543",
+      "dateStarted": "2021-01-18 16:32:22.860",
+      "dateFinished": "2021-01-18 16:32:25.066",
+      "status": "FINISHED"
+    },
+    {
+      "text": "// Filtrer par rapport à la table GKG\n\nval expectedNumItems \u003d 200000000 // Peut être rajouter un 0 ?\nval fpp \u003d 0.03\n\nval bfMentions \u003d totalmentionsDF.stat.bloomFilter(col(\"globaleventid\"), expectedNumItems, fpp)\n",
+      "user": "anonymous",
+      "dateUpdated": "2021-01-18 19:21:19.679",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "ERROR",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "org.apache.spark.SparkException: Job aborted due to stage failure: Task serialization failed: java.lang.OutOfMemoryError: Java heap space\njava.lang.OutOfMemoryError: Java heap space\n\n  at org.apache.spark.scheduler.DAGScheduler.failJobAndIndependentStages(DAGScheduler.scala:2059)\n  at org.apache.spark.scheduler.DAGScheduler.$anonfun$abortStage$2(DAGScheduler.scala:2008)\n  at org.apache.spark.scheduler.DAGScheduler.$anonfun$abortStage$2$adapted(DAGScheduler.scala:2007)\n  at scala.collection.mutable.ResizableArray.foreach(ResizableArray.scala:62)\n  at scala.collection.mutable.ResizableArray.foreach$(ResizableArray.scala:55)\n  at scala.collection.mutable.ArrayBuffer.foreach(ArrayBuffer.scala:49)\n  at org.apache.spark.scheduler.DAGScheduler.abortStage(DAGScheduler.scala:2007)\n  at org.apache.spark.scheduler.DAGScheduler.submitMissingTasks(DAGScheduler.scala:1233)\n  at org.apache.spark.scheduler.DAGScheduler.submitStage(DAGScheduler.scala:1118)\n  at org.apache.spark.scheduler.DAGScheduler.$anonfun$submitStage$5(DAGScheduler.scala:1121)\n  at org.apache.spark.scheduler.DAGScheduler.$anonfun$submitStage$5$adapted(DAGScheduler.scala:1120)\n  at scala.collection.immutable.List.foreach(List.scala:392)\n  at org.apache.spark.scheduler.DAGScheduler.submitStage(DAGScheduler.scala:1120)\n  at org.apache.spark.scheduler.DAGScheduler.handleJobSubmitted(DAGScheduler.scala:1061)\n  at org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.doOnReceive(DAGScheduler.scala:2196)\n  at org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.onReceive(DAGScheduler.scala:2188)\n  at org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.onReceive(DAGScheduler.scala:2177)\n  at org.apache.spark.util.EventLoop$$anon$1.run(EventLoop.scala:49)\n  at org.apache.spark.scheduler.DAGScheduler.runJob(DAGScheduler.scala:775)\n  at org.apache.spark.SparkContext.runJob(SparkContext.scala:2099)\n  at org.apache.spark.SparkContext.runJob(SparkContext.scala:2194)\n  at org.apache.spark.rdd.RDD.$anonfun$fold$1(RDD.scala:1157)\n  at org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:151)\n  at org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:112)\n  at org.apache.spark.rdd.RDD.withScope(RDD.scala:388)\n  at org.apache.spark.rdd.RDD.fold(RDD.scala:1151)\n  at org.apache.spark.rdd.RDD.$anonfun$treeAggregate$1(RDD.scala:1220)\n  at org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:151)\n  at org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:112)\n  at org.apache.spark.rdd.RDD.withScope(RDD.scala:388)\n  at org.apache.spark.rdd.RDD.treeAggregate(RDD.scala:1196)\n  at org.apache.spark.sql.DataFrameStatFunctions.buildBloomFilter(DataFrameStatFunctions.scala:601)\n  at org.apache.spark.sql.DataFrameStatFunctions.bloomFilter(DataFrameStatFunctions.scala:552)\n  ... 51 elided\nCaused by: java.lang.OutOfMemoryError: Java heap space\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d130"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1610993718203_1324579431",
+      "id": "paragraph_1610993718203_1324579431",
+      "dateCreated": "2021-01-18 19:15:18.203",
+      "dateStarted": "2021-01-18 19:21:19.717",
+      "dateFinished": "2021-01-18 19:21:27.251",
+      "status": "ERROR"
+    },
+    {
+      "text": "// On contine avec les fichiers events qui sont liés aux fichiers mentions par la colonne GLOBALEVENTID\n// qui correspond à mentions.GLOBALEVENTID\n\n// On commence avec le mois de janvier\nvar eventsDF \u003d spark.read.parquet(events_path + \"202001\")\n    .select(\n        col(\"value\").getItem(0).cast(LongType).as(\"globaleventid\"),\n        col(\"value\").getItem(1).cast(IntegerType).as(\"sqldate\"),\n        col(\"value\").getItem(2).cast(IntegerType).as(\"monthyear\"),\n        col(\"value\").getItem(3).cast(IntegerType).as(\"year\"),\n        substring(col(\"value\").getItem(1),5,2).cast(IntegerType).as(\"month\"),\n        substring(col(\"value\").getItem(1),7,2).cast(IntegerType).as(\"day\"),\n        col(\"value\").getItem(33).cast(IntegerType).as(\"numarticles\"),//.cast(Integer),\n        col(\"value\").getItem(34).cast(DoubleType).as(\"avgtone\"),\n        col(\"value\").getItem(53).as(\"actiongeo_countrycode\"),\n        col(\"value\").getItem(6).as(\"actor1name\"),\n        col(\"value\").getItem(16).as(\"actor2name\"),\n        col(\"value\").getItem(26).as(\"eventcode\")\n        )\n\nvar tempEventsDF \u003d spark.read.parquet(events_path + \"translations_202001\")\n    .select(\n        col(\"value\").getItem(0).cast(LongType).as(\"globaleventid\"),\n        col(\"value\").getItem(1).cast(IntegerType).as(\"sqldate\"),\n        col(\"value\").getItem(2).cast(IntegerType).as(\"monthyear\"),\n        col(\"value\").getItem(3).cast(IntegerType).as(\"year\"),\n        substring(col(\"value\").getItem(1),5,2).cast(IntegerType).as(\"month\"),\n        substring(col(\"value\").getItem(1),7,2).cast(IntegerType).as(\"day\"),\n        col(\"value\").getItem(33).cast(IntegerType).as(\"numarticles\"),//.cast(Integer),\n        col(\"value\").getItem(34).cast(DoubleType).as(\"avgtone\"),\n        col(\"value\").getItem(53).as(\"actiongeo_countrycode\"),\n        col(\"value\").getItem(6).as(\"actor1name\"),\n        col(\"value\").getItem(16).as(\"actor2name\"),\n        col(\"value\").getItem(26).as(\"eventcode\")\n        )\n\neventsDF \u003d eventsDF.union(tempEventsDF)\nprintln(\"Nombre de lignes : \" + eventsDF.count())\n\n// On continue avec les autres mois\nval moisList \u003d List(\"02\",\"03\",\"04\",\"05\",\"06\",\"07\",\"08\",\"09\",\"10\",\"11\",\"12\");\n\nfor( mois \u003c- moisList) {\n    tempEventsDF \u003d spark.read.parquet(events_path + \"2020\" + mois)\n        .select(\n            col(\"value\").getItem(0).cast(LongType).as(\"globaleventid\"),\n            col(\"value\").getItem(1).cast(IntegerType).as(\"sqldate\"),\n            col(\"value\").getItem(2).cast(IntegerType).as(\"monthyear\"),\n            col(\"value\").getItem(3).cast(IntegerType).as(\"year\"),\n            substring(col(\"value\").getItem(1),5,2).cast(IntegerType).as(\"month\"),\n            substring(col(\"value\").getItem(1),7,2).cast(IntegerType).as(\"day\"),\n            col(\"value\").getItem(33).cast(IntegerType).as(\"numarticles\"),//.cast(Integer),\n            col(\"value\").getItem(34).cast(DoubleType).as(\"avgtone\"),\n            col(\"value\").getItem(53).as(\"actiongeo_countrycode\"),\n            col(\"value\").getItem(6).as(\"actor1name\"),\n            col(\"value\").getItem(16).as(\"actor2name\"),\n            col(\"value\").getItem(26).as(\"eventcode\")\n            )\n    \n    eventsDF \u003d eventsDF.union(tempEventsDF)\n    println(\"Nombre de lignes events (\" + mois + \") : \" + eventsDF.count())\n    \n    tempEventsDF \u003d spark.read.parquet(events_path + \"translations_2020\" + mois)\n        .select(\n            col(\"value\").getItem(0).cast(LongType).as(\"globaleventid\"),\n            col(\"value\").getItem(1).cast(IntegerType).as(\"sqldate\"),\n            col(\"value\").getItem(2).cast(IntegerType).as(\"monthyear\"),\n            col(\"value\").getItem(3).cast(IntegerType).as(\"year\"),\n            substring(col(\"value\").getItem(1),5,2).cast(IntegerType).as(\"month\"),\n            substring(col(\"value\").getItem(1),7,2).cast(IntegerType).as(\"day\"),\n            col(\"value\").getItem(33).cast(IntegerType).as(\"numarticles\"),//.cast(Integer),\n            col(\"value\").getItem(34).cast(DoubleType).as(\"avgtone\"),\n            col(\"value\").getItem(53).as(\"actiongeo_countrycode\"),\n            col(\"value\").getItem(6).as(\"actor1name\"),\n            col(\"value\").getItem(16).as(\"actor2name\"),\n            col(\"value\").getItem(26).as(\"eventcode\")\n            )\n    \n    eventsDF \u003d eventsDF.union(tempEventsDF)\n   \n    println(\"Nombre de lignes events translation (\" + mois + \") : \" + eventsDF.count())\n}\n\n// Filtre\n\nval totaleventDF \u003d eventsDF\ntotaleventDF.write.parquet(\"/home/neo/Documents/Telecom Paris/INF721 - BDD non relationnelles/Projet/DF_new/df_events_total_2020\")",
+      "user": "anonymous",
+      "dateUpdated": "2021-01-18 19:08:12.406",
+      "progress": 98,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "Nombre de lignes : 6968814\nNombre de lignes events (02) : 11347749\nNombre de lignes events translation (02) : 13344355\nNombre de lignes events (03) : 17773373\nNombre de lignes events translation (03) : 19741198\nNombre de lignes events (04) : 23495550\nNombre de lignes events translation (04) : 25211253\nNombre de lignes events (05) : 28939572\nNombre de lignes events translation (05) : 30688934\nNombre de lignes events (06) : 34745547\nNombre de lignes events translation (06) : 36600934\nNombre de lignes events (07) : 40588859\nNombre de lignes events translation (07) : 42429393\nNombre de lignes events (08) : 46261791\nNombre de lignes events translation (08) : 48014104\nNombre de lignes events (09) : 51878849\nNombre de lignes events translation (09) : 53671995\nNombre de lignes events (10) : 56508254\nNombre de lignes events translation (10) : 57773397\nNombre de lignes events (11) : 60211156\nNombre de lignes events translation (11) : 61363594\nNombre de lignes events (12) : 64676224\nNombre de lignes events translation (12) : 66384878\n\u001b[1m\u001b[34meventsDF\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.sql.DataFrame\u001b[0m \u003d [globaleventid: bigint, sqldate: int ... 10 more fields]\n\u001b[1m\u001b[34mtempEventsDF\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.sql.DataFrame\u001b[0m \u003d [globaleventid: bigint, sqldate: int ... 10 more fields]\neventsDF: org.apache.spark.sql.DataFrame \u003d [globaleventid: bigint, sqldate: int ... 10 more fields]\n\u001b[1m\u001b[34mmoisList\u001b[0m: \u001b[1m\u001b[32mList[String]\u001b[0m \u003d List(02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12)\n\u001b[1m\u001b[34mtotaleventDF\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.sql.DataFrame\u001b[0m \u003d [globaleventid: bigint, sqldate: int ... 10 more fields]\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d81"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d82"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d83"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d84"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d85"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d86"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d87"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d88"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d89"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d90"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d91"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d92"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d93"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d94"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d95"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d96"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d97"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d98"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d99"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d100"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d101"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d102"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d103"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d104"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d105"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d106"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d107"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d108"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d109"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d110"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d111"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d112"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d113"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d114"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d115"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d116"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d117"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d118"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d119"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d120"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d121"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d122"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d123"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d124"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d125"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d126"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d127"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d128"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1610871923276_798078533",
+      "id": "paragraph_1610871923276_798078533",
+      "dateCreated": "2021-01-17 09:25:23.276",
+      "dateStarted": "2021-01-18 19:08:12.419",
+      "dateFinished": "2021-01-18 19:13:24.425",
+      "status": "FINISHED"
+    },
+    {
+      "user": "anonymous",
+      "progress": 0,
+      "config": {},
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1610993636218_109872855",
+      "id": "paragraph_1610993636218_109872855",
+      "dateCreated": "2021-01-18 19:13:56.219",
+      "status": "READY"
+    },
+    {
+      "text": "",
+      "user": "anonymous",
+      "dateUpdated": "2021-01-17 10:31:51.597",
+      "progress": 95,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "Nombre de lignes GKG translation (01) : 17645896\nNombre de lignes GKG translation (02) : 17645896\nNombre de lignes GKG translation (03) : 17645896\nNombre de lignes GKG translation (04) : 17645896\nNombre de lignes GKG translation (05) : 17645896\nNombre de lignes GKG translation (06) : 17645896\nNombre de lignes GKG translation (07) : 17645896\nNombre de lignes GKG translation (08) : 17645896\nNombre de lignes GKG translation (09) : 17645896\nNombre de lignes GKG translation (10) : 17645896\nNombre de lignes GKG translation (11) : 17645896\nNombre de lignes GKG translation (12) : 17645896\n\u001b[1m\u001b[34mmoisList\u001b[0m: \u001b[1m\u001b[32mList[String]\u001b[0m \u003d List(01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12)\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d223"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d224"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d225"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d226"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d227"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d228"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d229"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d230"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d231"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d232"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d233"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d234"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d235"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d236"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d237"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d238"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d239"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d240"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d241"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d242"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d243"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d244"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d245"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d246"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1610872918300_1452645144",
+      "id": "paragraph_1610872918300_1452645144",
+      "dateCreated": "2021-01-17 09:41:58.300",
+      "dateStarted": "2021-01-17 10:31:02.076",
+      "dateFinished": "2021-01-17 10:31:35.776",
+      "status": "FINISHED"
+    },
+    {
+      "text": "mentions_1.printSchema()",
+      "user": "anonymous",
+      "dateUpdated": "2021-01-17 09:52:00.284",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "root\n |-- globaleventid: string (nullable \u003d true)\n |-- language: string (nullable \u003d true)\n\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1610873268369_2058368528",
+      "id": "paragraph_1610873268369_2058368528",
+      "dateCreated": "2021-01-17 09:47:48.369",
+      "dateStarted": "2021-01-17 09:52:00.290",
+      "dateFinished": "2021-01-17 09:52:00.469",
+      "status": "FINISHED"
+    },
+    {
+      "text": "val expectedNumItems \u003d 1000000\nval fpp \u003d 0.03\n\nval in1 \u003d spark.sparkContext.parallelize(List(0, 1, 2, 3, 4, 5))\nval d1 \u003d in1.map(x \u003d\u003e (x, x+1, x+2)).toDF(\"c1\", \"c2\", \"c3\")\n\nval in2 \u003d spark.sparkContext.parallelize(List(0, 1, 2))\nval d2 \u003d in2.map(x \u003d\u003e (x)).toDF(\"c1\")\n\nval s2 \u003d d2.stat.bloomFilter($\"c1\", expectedNumItems, fpp)\n\nval a \u003d spark.sparkContext.broadcast(s2)\n\nval x \u003d d1.filter(x \u003d\u003e a.value.mightContain(x(0)))\n\n//case class newType(c1: Int, c2: Int, c3: Int) extends Serializable\n\n//val xDF \u003d x.map(y \u003d\u003e newType(y(0).toString.toInt, y(1).toString.toInt, y(2).toString.toInt)).toDF()",
+      "user": "anonymous",
+      "dateUpdated": "2021-01-17 22:38:50.160",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "\u001b[1m\u001b[34mexpectedNumItems\u001b[0m: \u001b[1m\u001b[32mInt\u001b[0m \u003d 1000000\n\u001b[1m\u001b[34mfpp\u001b[0m: \u001b[1m\u001b[32mDouble\u001b[0m \u003d 0.03\n\u001b[1m\u001b[34min1\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.rdd.RDD[Int]\u001b[0m \u003d ParallelCollectionRDD[71] at parallelize at \u003cconsole\u003e:68\n\u001b[1m\u001b[34md1\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.sql.DataFrame\u001b[0m \u003d [c1: int, c2: int ... 1 more field]\n\u001b[1m\u001b[34min2\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.rdd.RDD[Int]\u001b[0m \u003d ParallelCollectionRDD[73] at parallelize at \u003cconsole\u003e:71\n\u001b[1m\u001b[34md2\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.sql.DataFrame\u001b[0m \u003d [c1: int]\n\u001b[1m\u001b[34ms2\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.util.sketch.BloomFilter\u001b[0m \u003d org.apache.spark.util.sketch.BloomFilterImpl@5218a046\n\u001b[1m\u001b[34ma\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.broadcast.Broadcast[org.apache.spark.util.sketch.BloomFilter]\u001b[0m \u003d Broadcast(31)\n\u001b[1m\u001b[34mx\u001b[0m: \u001b[1m\u001b[32morg.ap...\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d25"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1610917520393_625863797",
+      "id": "paragraph_1610917520393_625863797",
+      "dateCreated": "2021-01-17 22:05:20.393",
+      "dateStarted": "2021-01-17 22:38:50.166",
+      "dateFinished": "2021-01-17 22:38:50.757",
+      "status": "FINISHED"
+    },
+    {
+      "text": "d1.show(10)",
+      "user": "anonymous",
+      "dateUpdated": "2021-01-17 22:34:33.625",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "+---+---+---+\n| c1| c2| c3|\n+---+---+---+\n|  0|  1|  2|\n|  1|  2|  3|\n|  2|  3|  4|\n|  3|  4|  5|\n|  4|  5|  6|\n|  5|  6|  7|\n+---+---+---+\n\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d10"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d11"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d12"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1610917546068_383773040",
+      "id": "paragraph_1610917546068_383773040",
+      "dateCreated": "2021-01-17 22:05:46.068",
+      "dateStarted": "2021-01-17 22:34:33.633",
+      "dateFinished": "2021-01-17 22:34:34.120",
+      "status": "FINISHED"
+    },
+    {
+      "text": "d2.show(10)",
+      "user": "anonymous",
+      "dateUpdated": "2021-01-17 22:34:48.603",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "+---+\n| c1|\n+---+\n|  0|\n|  1|\n|  2|\n+---+\n\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d13"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d14"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d15"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1610919282384_1461590780",
+      "id": "paragraph_1610919282384_1461590780",
+      "dateCreated": "2021-01-17 22:34:42.385",
+      "dateStarted": "2021-01-17 22:34:48.611",
+      "dateFinished": "2021-01-17 22:34:48.966",
+      "status": "FINISHED"
+    },
+    {
+      "text": "x.show(10)",
+      "user": "anonymous",
+      "dateUpdated": "2021-01-17 22:39:00.718",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "+---+---+---+\n| c1| c2| c3|\n+---+---+---+\n|  0|  1|  2|\n|  1|  2|  3|\n|  2|  3|  4|\n+---+---+---+\n\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d29"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d30"
+            },
+            {
+              "jobUrl": "http://192.168.0.25:4040/jobs/job?id\u003d31"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1610919296876_270757511",
+      "id": "paragraph_1610919296876_270757511",
+      "dateCreated": "2021-01-17 22:34:56.876",
+      "dateStarted": "2021-01-17 22:39:00.726",
+      "dateFinished": "2021-01-17 22:39:01.223",
+      "status": "FINISHED"
+    },
+    {
+      "user": "anonymous",
+      "progress": 0,
+      "config": {},
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1610873276002_1265945857",
+      "id": "paragraph_1610873276002_1265945857",
+      "dateCreated": "2021-01-17 09:47:56.002",
+      "status": "READY"
+    }
+  ],
+  "name": "GDELT_ETL2",
+  "id": "2FY4ZPUGJ",
+  "defaultInterpreterGroup": "spark",
+  "version": "0.9.0",
+  "noteParams": {},
+  "noteForms": {},
+  "angularObjects": {},
+  "config": {
+    "isZeppelinNotebookCronEnable": false
+  },
+  "info": {}
+}
